@@ -9,7 +9,7 @@
 #if os(iOS)
 
 import Foundation
-import WebKit
+@preconcurrency import WebKit
 import UIKit
 
 /**
@@ -72,13 +72,15 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
     }()
     
     private lazy var webViewIsLoadingObserver = self.webView.observe(\.isLoading) { [weak self] (webView, change) in
-        
-        self?.updateControlButtons()
+        DispatchQueue.main.async { [weak self] in
+            self?.updateControlButtons()
+        }
     }
     
     private lazy var webViewEstimatedProgressObserver = self.webView.observe(\.estimatedProgress) { [weak self] (webView, change) in
-        
-        self?.updateProgress()
+        DispatchQueue.main.async { [weak self] in
+            self?.updateProgress()
+        }
     }
     
     private var request: URLRequest?
@@ -93,8 +95,10 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
         else {
             
             //NOTE: On iOS 10 and below, swift key-value observers are not automatically invalidated upon deallocation, so we have to explicitly invalidate it in order to prevent the app from crashing
-            self.webViewIsLoadingObserver.invalidate()
-            self.webViewEstimatedProgressObserver.invalidate()
+            DispatchQueue.main.async { [weak self] in
+                self?.webViewIsLoadingObserver.invalidate()
+                self?.webViewEstimatedProgressObserver.invalidate()
+            }
         }
     }
     
@@ -168,7 +172,7 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
     
     //MARK: - WKNavigationDelegate
     
-    open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+    open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping  @MainActor (WKNavigationActionPolicy) -> Void) {
         
         if (try? self.redirectionHandler?(navigationAction.request)) == true {
             

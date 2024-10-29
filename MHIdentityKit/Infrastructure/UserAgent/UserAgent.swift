@@ -9,6 +9,7 @@
 import Foundation
 
 ///A type that represents a resource owner's user agent (typically a web browser) and is capable of receiving incoming requests (via redirection) from the authorization server.
+@MainActor
 public protocol UserAgent {
     
     /**

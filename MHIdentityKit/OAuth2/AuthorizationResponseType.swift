@@ -9,7 +9,7 @@
 import Foundation
 
 //https://tools.ietf.org/html/rfc6749#section-3.1.1
-public struct AuthorizationResponseType  {
+public struct AuthorizationResponseType: Sendable  {
     
     public var value: String
     

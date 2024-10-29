@@ -152,7 +152,7 @@ open class AuthorizationCodeGrantFlow: AuthorizationGrantFlow {
         self.userAgent.perform(request, redirectURI: redirectURI, redirectionHandler: redirectionHandler)
     }
     
-    open func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
+    open func perform(_ request: URLRequest, completion: @escaping @Sendable (NetworkResponse) -> Void) {
         
         self.networkClient.perform(request, completion: completion)
     }
@@ -223,7 +223,7 @@ open class AuthorizationCodeGrantFlow: AuthorizationGrantFlow {
     
     //MARK: - AuthorizationGrantFlow
     
-    open func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+    open func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
 
         let authorizationRequest = AuthorizationRequest(clientID: self.clientID, redirectURI: self.redirectURI, scope: self.scope, state: self.state)
         let authorizationURLRequest = self.urlRequest(from: authorizationRequest)
@@ -286,22 +286,23 @@ open class AuthorizationCodeGrantFlow: AuthorizationGrantFlow {
                 
                 //perform the token request
                 _self.perform(accesTokenURLRequest, completion: { (networkResponse) in
-                    
-                    do {
-                        
-                        let accessTokenResponse = try _self.accessTokenResponse(from: networkResponse)
-                        try _self.validate(accessTokenResponse)
-                        
-                        DispatchQueue.main.async {
+                    Task { @MainActor in
+                        do {
                             
-                            handler(accessTokenResponse, nil)
+                            let accessTokenResponse = try _self.accessTokenResponse(from: networkResponse)
+                            try _self.validate(accessTokenResponse)
+                            
+                            DispatchQueue.main.async {
+                                
+                                handler(accessTokenResponse, nil)
+                            }
                         }
-                    }
-                    catch {
-                        
-                        DispatchQueue.main.async {
+                        catch {
                             
-                            handler(nil, error)
+                            DispatchQueue.main.async {
+                                
+                                handler(nil, error)
+                            }
                         }
                     }
                 })

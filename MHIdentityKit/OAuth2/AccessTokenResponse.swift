@@ -9,6 +9,7 @@
 import Foundation
 
 //https://tools.ietf.org/html/rfc6749#section-5.1
+@MainActor
 public struct AccessTokenResponse {
     
     public var accessToken: String
@@ -77,6 +78,7 @@ public struct AccessTokenResponse {
     private let responseCreationDate = Date()
     
     ///determine whenever the access token has expired
+    @MainActor
     public var isExpired: Bool {
         
         //if expiration time interval is not provided - call the expiration handler
@@ -107,7 +109,7 @@ extension AccessTokenResponse {
     
     ///Provide a custom expiration handler in case the server does not return the expiration time interval.
     ///-returns: true if the token is expired, otherwise false. Default behaviour returns false.
-    public static var expirationHandler: (AccessTokenResponse) -> Bool = { _ in
+    @MainActor public static var expirationHandler: (AccessTokenResponse) -> Bool = { _ in
         
         //the authorization server SHOULD provide the expiration time via other means or document the default value.
         //Assume the token has not expired. In case it is - the failure of the request will indicate that the token is invalid, that should result in retry from client perspective.

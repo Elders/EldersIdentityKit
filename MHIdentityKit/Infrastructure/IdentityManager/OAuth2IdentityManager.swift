@@ -99,18 +99,19 @@ open class OAuth2IdentityManager: IdentityManager {
     
     //MARK: - IdentityManager
     
-    private func performAuthentication(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+    private func performAuthentication(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
         
         self.postWillAuthenticateNotification()
         
         self.flow.authenticate { (response, error) in
-            
-            self.didFinishAuthenticating(with: response, error: error)
-            handler(response, error)
+            Task { @MainActor in
+                self.didFinishAuthenticating(with: response, error: error)
+                handler(response, error)
+            }
         }
     }
     
-    private func authenticate(forced: Bool, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+    private func authenticate(forced: Bool, handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
         
         //force authenticate
         if forced {
@@ -128,16 +129,17 @@ open class OAuth2IdentityManager: IdentityManager {
             refresher.refresh(using: request, handler: { [weak self] (response, error) in
                 
                 if let error = error as? MHIdentityKitError, error.contains(error: ErrorResponse.self) {
-                
-                    //if the error returned is ErrorResponse - clear the existing refresh token
-                    self?.accessTokenResponse?.refreshToken = nil
-                    
-                    //if force authentication is enabled upon refresh error, and the error returned is ErrorResponse - perform a new authentication
-                    if self?.forceAuthenticateOnRefreshError == true {
+                    Task { @MainActor in
+                        //if the error returned is ErrorResponse - clear the existing refresh token
+                        self?.accessTokenResponse?.refreshToken = nil
                         
-                        //authenticate
-                        self?.performAuthentication(handler: handler)
-                        return
+                        //if force authentication is enabled upon refresh error, and the error returned is ErrorResponse - perform a new authentication
+                        if self?.forceAuthenticateOnRefreshError == true {
+                            
+                            //authenticate
+                            self?.performAuthentication(handler: handler)
+                            return
+                        }
                     }
                 }
                 
@@ -152,7 +154,7 @@ open class OAuth2IdentityManager: IdentityManager {
         self.performAuthentication(handler: handler)
     }
     
-    private func performAuthorization(request: URLRequest, forceAuthenticate: Bool, handler: @escaping (URLRequest, Error?) -> Void) {
+    private func performAuthorization(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable (URLRequest, Error?) -> Void) {
         
         if forceAuthenticate == false, let response = self.accessTokenResponse, response.isExpired == false   {
             
@@ -161,53 +163,53 @@ open class OAuth2IdentityManager: IdentityManager {
         }
         
         self.authenticate(forced: forceAuthenticate) { (response, error) in
-            
-            guard
-            error == nil,
-            let response = response
-            else {
-                
-                if self.retryAuthorizationOnAuthenticationError == true && error is ErrorResponse {
-                    
-                    self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: handler)
-                }
+            Task { @MainActor in
+                guard
+                    error == nil,
+                    let response = response
                 else {
                     
-                    handler(request, error)
+                    if self.retryAuthorizationOnAuthenticationError == true && error is ErrorResponse {
+                        
+                        self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: handler)
+                    }
+                    else {
+                        
+                        handler(request, error)
+                    }
+                    
+                    return
                 }
                 
-                return
+                self.accessTokenResponse = response
+                self.tokenAuthorizerProvider(response).authorize(request: request, handler: handler)
             }
-            
-            self.accessTokenResponse = response
-            self.tokenAuthorizerProvider(response).authorize(request: request, handler: handler)
         }
     }
     
     //MARK: - IdentityManager
     
-    open func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping (URLRequest, Error?) -> Void) {
+    open func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping  @Sendable (URLRequest, Error?) -> Void) {
         
         self.queue.addOperation {
             
-            let semaphore = DispatchSemaphore(value: 0)
-            
-            self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: { (request, error) in
+            Task {
                 
-                handler(request, error)
-                
-                semaphore.signal()
-            })
-            
-            semaphore.wait()
+                await self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: { (request, error) in
+                    
+                    handler(request, error)
+                    
+                })
+            }
         }
     }
     
     open func revokeAuthenticationState() {
         
         self.queue.addOperation {
-            
-            self.accessTokenResponse = nil
+            Task { @MainActor in
+                self.accessTokenResponse = nil
+            }
             
             //TODO: implement token revocation trough server
         }
@@ -216,8 +218,9 @@ open class OAuth2IdentityManager: IdentityManager {
     open func revokeAuthorizationState() {
         
         self.queue.addOperation {
-            
-            self.accessTokenResponse?.expiresIn = 0
+            Task { @MainActor in
+                self.accessTokenResponse?.expiresIn = 0
+            }
         }
     }
     
@@ -294,7 +297,7 @@ extension OAuth2IdentityManager {
         }
     }
 }
-
+@MainActor
 extension Notification.Name {
     
     public static let OAuth2IdentityManagerWillAuthenticate = OAuth2IdentityManager.willAuthenticate

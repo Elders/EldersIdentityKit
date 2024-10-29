@@ -9,6 +9,7 @@
 import Foundation
 
 //A type that performs an authorization grant flow in order to authenticate a client.
+@MainActor
 public protocol AuthorizationGrantFlow {
         
     /**
@@ -16,7 +17,7 @@ public protocol AuthorizationGrantFlow {
      
      - parameter handler: The callback, executed when the authentication is complete. The callback takes 2 arguments - a Token and an Error
      */
-    func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void)
+    func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void)
 }
 
 extension AuthorizationGrantFlow {

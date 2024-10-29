@@ -17,7 +17,7 @@ public struct AccessTokenResponseHandler {
     public init() {
         
     }
-    
+    @MainActor
     public func handle(response networkResponse: NetworkResponse) throws -> AccessTokenResponse {
         
         //if there is an error - throw it

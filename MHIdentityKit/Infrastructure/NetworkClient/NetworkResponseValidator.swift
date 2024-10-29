@@ -9,6 +9,7 @@
 import Foundation
 
 ///A type that validates network response
+@MainActor
 public protocol NetworkResponseValidator {
     
     ///Validates a network response and returns true if valid and false if invalid

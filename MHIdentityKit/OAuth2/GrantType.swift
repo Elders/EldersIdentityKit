@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct GrantType  {
+public struct GrantType: Sendable  {
     
     public var value: String
     

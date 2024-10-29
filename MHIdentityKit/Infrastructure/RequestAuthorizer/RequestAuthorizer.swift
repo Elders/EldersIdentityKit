@@ -9,6 +9,7 @@
 import Foundation
 
 ///A type that authorize instances of URLRequest
+@MainActor
 public protocol RequestAuthorizer {
     
     /**
@@ -64,9 +65,9 @@ extension URLRequest {
      - parameter handler: The callback, executed when the authorization is complete. The callback takes 2 arguments - an URLRequest and an Error
      
      */
+    @MainActor
     public func authorize(using authorizer: RequestAuthorizer, handler: @escaping (URLRequest, Error?) -> Void) {
-        
-        authorizer.authorize(request: self, handler: handler)
+            authorizer.authorize(request: self, handler: handler)
     }
     
     /**
@@ -82,65 +83,10 @@ extension URLRequest {
      
      */
     @available(iOS 13, tvOS 13, macOS 10.15, watchOS 6, *)
+    @MainActor
     public func authorized(using authorizer: RequestAuthorizer) async throws -> URLRequest {
         
         return try await authorizer.authorize(request: self)
-    }
-    
-    /**
-     Synchronously authorize the receiver using a given authorizer.
-     
-     - warning: This method could potentially perform a network request synchrnously. Because of this it is hihgly recommended to NOT use this method from the main thread.
-     
-     - parameter authorizer: The authorizer used to authorize the receiver.
-     
-     - throws: An authorization error.
-     - returns: An authorized copy of the recevier.
-     */
-    
-    @available(*, noasync)
-    public func authorized(using authorizer: RequestAuthorizer) throws -> URLRequest {
-        
-        var request = self
-        var error: Error? = nil
-        
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        DispatchQueue(label: bundleIdentifier + ".authorization", qos: .default).async {
-            
-            self.authorize(using: authorizer, handler: { (r, e) in
-                
-                request = r
-                error = e
-                
-                semaphore.signal()
-            })
-        }
-        
-        semaphore.wait()
-        
-        guard error == nil else {
-            
-            throw error!
-        }
-        
-        return request
-    }
-    
-    /**
-     Synchronously authorize the receiver using a given authorizer.
-     
-     - warning: This method could potentially perform a network request synchrnously. Because of this it is hihgly recommended to NOT use this method from the main thread.
-     
-     - parameter authorizer: The authorizer used to authorize the receiver.
-     
-     - throws: An authorization error.
-     */
-    
-    @available(*, noasync)
-    public mutating func authorize(using authorizer: RequestAuthorizer) throws {
-        
-        try self = self.authorized(using: authorizer)
     }
     
     /**
@@ -151,6 +97,7 @@ extension URLRequest {
      - throws: An authorization error.
      */
     @available(iOS 13, tvOS 13, macOS 10.15, watchOS 6, *)
+    @MainActor
     public mutating func authorize(using authorizer: RequestAuthorizer) async throws {
         
         self = try await authorized(using: authorizer)

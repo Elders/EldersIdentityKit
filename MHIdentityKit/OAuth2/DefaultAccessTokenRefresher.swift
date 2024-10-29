@@ -21,7 +21,7 @@ open class DefaultAccessTokenRefresher: AccessTokenRefresher {
         self.clientAuthorizer = clientAuthorizer
     }
     
-    open func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+    open func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping  @Sendable (AccessTokenResponse?, Error?) -> Void) {
         
         var request = URLRequest(url: self.tokenEndpoint)
         request.httpMethod = "POST"
@@ -36,28 +36,28 @@ open class DefaultAccessTokenRefresher: AccessTokenRefresher {
             }
             
             self.networkClient.perform(request) { (response) in
-                
-                do {
-                    
-                    let accessTokenResponse = try AccessTokenResponseHandler().handle(response: response)
-                    
-                    DispatchQueue.main.async {
+                Task {
+                    do {
+                        
+                        let accessTokenResponse = try await AccessTokenResponseHandler().handle(response: response)
+                        
                         
                         handler(accessTokenResponse, nil)
-                    }
-                }
-                catch let error as LocalizedError {
-                    
-                    DispatchQueue.main.async {
                         
-                        handler(nil, MHIdentityKitError.authenticationFailed(reason: error))
                     }
-                }
-                catch {
-                    
-                    DispatchQueue.main.async {
+                    catch let error as LocalizedError {
                         
-                        handler(nil, MHIdentityKitError.authenticationFailed(reason: MHIdentityKitError(error: error)))
+                        DispatchQueue.main.async {
+                            
+                            handler(nil, MHIdentityKitError.authenticationFailed(reason: error))
+                        }
+                    }
+                    catch {
+                        
+                        DispatchQueue.main.async {
+                            
+                            handler(nil, MHIdentityKitError.authenticationFailed(reason: MHIdentityKitError(error: error)))
+                        }
                     }
                 }
             }

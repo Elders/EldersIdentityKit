@@ -10,7 +10,7 @@ import Foundation
 
 public struct ErrorResponse: LocalizedError, Codable {
     
-    public enum Code: String, Codable {
+    public enum Code: String, Codable, Sendable {
         
         //https://tools.ietf.org/html/rfc6749#section-5.2
         case invalidRequest = "invalid_request"

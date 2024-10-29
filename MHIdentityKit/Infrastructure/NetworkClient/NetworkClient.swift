@@ -9,9 +9,12 @@
 import Foundation
 
 ///A type that performs network requests
+@MainActor
 public protocol NetworkClient {
     
     ///Performs a request and execute a completion handler when it is done
-    func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void)
+    func perform(_ request: URLRequest, completion: @escaping @Sendable (NetworkResponse) -> Void)
+    
+    func perform(_ request: URLRequest) async throws -> NetworkResponse
 }
 

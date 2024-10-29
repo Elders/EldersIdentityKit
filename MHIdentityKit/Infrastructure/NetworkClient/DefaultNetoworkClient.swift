@@ -14,10 +14,25 @@ import Foundation
 
 ///A default implementation of a NetworkClient, used internally
 class DefaultNetoworkClient: NetworkClient {
+    func perform(_ request: URLRequest) async throws -> NetworkResponse {
+        
+        return try await withCheckedThrowingContinuation { continuation in
+               // Call the callback-based version of `perform`
+               perform(request) { response in
+                   // Handle success or failure
+                   if let error = response.error {
+                       continuation.resume(throwing: error)
+                   } else {
+                       continuation.resume(returning: response)
+                   }
+               }
+           }
+    }
+    
     
     private let session = URLSession(configuration: .ephemeral)
     
-    func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
+    func perform(_ request: URLRequest, completion: @escaping @Sendable(NetworkResponse) -> Void) {
         
         #if os(iOS)
             let application = UIApplication.shared
@@ -39,8 +54,10 @@ class DefaultNetoworkClient: NetworkClient {
             completion(NetworkResponse(data: data, response: response, error: error))
             
             #if os(iOS)
+            DispatchQueue.main.sync {
                 application.endBackgroundTask(id)
                 id = UIBackgroundTaskIdentifier.invalid
+            }
             #endif
         }
         
@@ -54,4 +71,5 @@ class DefaultNetoworkClient: NetworkClient {
 }
 
 ///The shared instance of the default network client, used internally
+@MainActor
 public let _defaultNetworkClient: NetworkClient = DefaultNetoworkClient()
