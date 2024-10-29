@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
 
-  s.name         = "MHIdentityKit"
+  s.name         = "EldersIdentityKit"
   s.version      = "1.14.0"
-  s.source       = { :git => "https://github.com/KoCMoHaBTa/#{s.name}.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/Elders/#{s.name}.git", :tag => "#{s.version}" }
   s.license      = { :type => "MIT", :file => "LICENSE" }
   s.author       = "Milen Halachev"
   s.summary      = "OAuth2 and OpenID connect iOS Protocol Oriented Swift client library."
