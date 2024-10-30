@@ -223,7 +223,7 @@ open class AuthorizationCodeGrantFlow: AuthorizationGrantFlow {
     
     //MARK: - AuthorizationGrantFlow
     
-    open func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    open func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
 
         let authorizationRequest = AuthorizationRequest(clientID: self.clientID, redirectURI: self.redirectURI, scope: self.scope, state: self.state)
         let authorizationURLRequest = self.urlRequest(from: authorizationRequest)
@@ -232,8 +232,9 @@ open class AuthorizationCodeGrantFlow: AuthorizationGrantFlow {
 
             //utility to fail and complete
             func fail(with error: Error) -> Error  {
-                
-                handler(nil, error)
+                Task { @MainActor in
+                    handler(nil, error)
+                }
                 return error
             }
             

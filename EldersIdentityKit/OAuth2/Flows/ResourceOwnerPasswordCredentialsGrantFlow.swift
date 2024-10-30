@@ -84,7 +84,7 @@ open class ResourceOwnerPasswordCredentialsGrantFlow: AuthorizationGrantFlow {
         //nothing to validate here
     }
     @MainActor
-    open func authenticate(using request: URLRequest, handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    open func authenticate(using request: URLRequest, handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
         
         self.authorize(request, handler: { (request, error) in
             
@@ -120,7 +120,7 @@ open class ResourceOwnerPasswordCredentialsGrantFlow: AuthorizationGrantFlow {
     
     //MARK: - AuthorizationGrantFlow
     @MainActor
-    open func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    open func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
         
         self.credentialsProvider.credentials { (username, password) in
             
@@ -129,7 +129,6 @@ open class ResourceOwnerPasswordCredentialsGrantFlow: AuthorizationGrantFlow {
             let request = self.urlRequest(from: accessTokenRequest)
             
             self.authenticate(using: request, handler: { (response, error) in
-                Task { @MainActor in
                     if let error = error {
                         
                         self.credentialsProvider.didFailAuthenticating(with: error)
@@ -140,7 +139,6 @@ open class ResourceOwnerPasswordCredentialsGrantFlow: AuthorizationGrantFlow {
                     }
                     
                     handler(response, error)
-                }
             })
         }
     }

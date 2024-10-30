@@ -145,7 +145,7 @@ open class ImplicitGrantFlow: AuthorizationGrantFlow {
     
     //MARK: - AuthorizationGrantFlow
     
-    public func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+    public func authenticate(handler: @escaping @Sendable @MainActor(AccessTokenResponse?, Error?) -> Void) {
         
         let authorizationRequest = AuthorizationRequest(clientID: self.clientID, redirectURI: self.redirectURI, scope: self.scope, state: self.state)
         let authorizationURLRequest = self.urlRequest(from: authorizationRequest)
@@ -154,8 +154,9 @@ open class ImplicitGrantFlow: AuthorizationGrantFlow {
             
             //utility to fail and complete
             func fail(with error: Error) -> Error  {
-                
-                handler(nil, error)
+                Task { @MainActor in
+                    handler(nil, error)
+                }
                 return error
             }
             

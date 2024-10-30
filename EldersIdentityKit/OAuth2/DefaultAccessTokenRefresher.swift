@@ -39,7 +39,7 @@ open class DefaultAccessTokenRefresher: AccessTokenRefresher {
                 Task {
                     do {
                         
-                        let accessTokenResponse = try await AccessTokenResponseHandler().handle(response: response)
+                        let accessTokenResponse = try AccessTokenResponseHandler().handle(response: response)
                         
                         
                         handler(accessTokenResponse, nil)

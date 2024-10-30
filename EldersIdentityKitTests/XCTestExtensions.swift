@@ -12,7 +12,7 @@ import XCTest
 extension XCTestCase {
     
     ///Performs an expectation with a given description, timeout and handler. You should fulfil the expectation within the handler in the given timeout timeframe
-    public func performExpectation(description: String = "XCTestCase Default Expectation", timeout: TimeInterval = 2, handler: (_ expectation: XCTestExpectation) -> Void) {
+    @MainActor public func performExpectation(description: String = "XCTestCase Default Expectation", timeout: TimeInterval = 2, handler: (_ expectation: XCTestExpectation) -> Void) {
         
         let expectation = self.expectation(description: description)
         handler(expectation)
@@ -24,11 +24,12 @@ extension XCTestCase {
     }
 }
 
+@MainActor
 extension XCTestExpectation {
-    
+    @MainActor
     private struct AssociatedKeys {
         
-      static var conditionsKey: Void?
+        static var conditionsKey: Void?
     }
     
     public private(set) var conditions: [String: Bool] {

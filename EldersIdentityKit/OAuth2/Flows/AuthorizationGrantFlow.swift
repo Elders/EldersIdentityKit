@@ -17,7 +17,7 @@ public protocol AuthorizationGrantFlow {
      
      - parameter handler: The callback, executed when the authentication is complete. The callback takes 2 arguments - a Token and an Error
      */
-    func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void)
+    func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void)
 }
 
 extension AuthorizationGrantFlow {

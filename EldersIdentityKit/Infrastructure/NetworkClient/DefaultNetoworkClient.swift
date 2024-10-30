@@ -32,7 +32,7 @@ class DefaultNetoworkClient: NetworkClient {
     
     private let session = URLSession(configuration: .ephemeral)
     
-    func perform(_ request: URLRequest, completion: @escaping @Sendable(NetworkResponse) -> Void) {
+    func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void) {
         
         #if os(iOS)
             let application = UIApplication.shared
@@ -50,9 +50,9 @@ class DefaultNetoworkClient: NetworkClient {
         #endif
         
         let task = self.session.dataTask(with: request) { (data, response, error) in
-            
-            completion(NetworkResponse(data: data, response: response, error: error))
-            
+            Task { @MainActor in
+                completion(NetworkResponse(data: data, response: response, error: error))
+            }
             #if os(iOS)
             DispatchQueue.main.sync {
                 application.endBackgroundTask(id)

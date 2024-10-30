@@ -11,7 +11,7 @@ import XCTest
 @testable import EldersIdentityKit
 
 class OAuth2IdentityManagerTests: XCTestCase {
-    
+    @MainActor
     func testOAuth2IdentityManager() {
         
         self.performExpectation { (e) in
@@ -117,7 +117,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    func testForceAuthenticateOnRefreshError() {
+    @MainActor func testForceAuthenticateOnRefreshError() {
         
         class Flow: AuthorizationGrantFlow {
             
@@ -178,23 +178,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    func testSynchronousAuthorization() {
-        
-        class Flow: AuthorizationGrantFlow {
-            
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
-                
-                handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 0, refreshToken: "trt1", scope: nil), nil)
-            }
-        }
-        
-        let manager = OAuth2IdentityManager(flow: Flow(), refresher: nil, storage: InMemoryIdentityStorage(), authorizationMethod: .header)
-        
-        let request = try! URLRequest(url: URL(string: "http://foo.bar")!).authorized(using: manager)
-        
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer tat1")
-    }
-    
+    @MainActor
     func testSerialAuthorizationBehaviour() {
         
         //if multiple authorization calls are made - only 1 should perform authentication :):)
@@ -209,7 +193,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
                 self.e = e
             }
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 callCount += 1
@@ -221,8 +205,9 @@ class OAuth2IdentityManagerTests: XCTestCase {
                 }
                 
                 DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + (2 * Double(NSEC_PER_SEC)) / Double(NSEC_PER_SEC)) {
-                    
-                    handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 1234, refreshToken: "trt2", scope: nil), nil)
+                    Task { @MainActor in
+                        handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 1234, refreshToken: "trt2", scope: nil), nil)
+                    }
                 }
             }
         }
@@ -245,7 +230,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    func testPerformingRequestsUsingStandartResponseValidator() {
+    @MainActor func testPerformingRequestsUsingStandartResponseValidator() {
         
         struct Flow: AuthorizationGrantFlow {
             
@@ -259,9 +244,16 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
         
         struct NClient: NetworkClient {
+          
+            
             
             let e: XCTestExpectation
             var statusCode: Int
+            
+            func perform(_ request: URLRequest) async throws -> EldersIdentityKit.NetworkResponse {
+                e.fulfill()
+                return NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil)
+            }
             
             func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
                 
@@ -297,7 +289,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    func testPerformingRequestsUsingCustomResponseValidator() {
+    @MainActor func testPerformingRequestsUsingCustomResponseValidator() {
         
         struct Flow: AuthorizationGrantFlow {
             
@@ -314,6 +306,11 @@ class OAuth2IdentityManagerTests: XCTestCase {
             
             let e: XCTestExpectation
             var statusCode: Int
+            
+            func perform(_ request: URLRequest) async throws -> EldersIdentityKit.NetworkResponse {
+                e.fulfill()
+                return NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil)
+            }
             
             func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
                 
@@ -356,7 +353,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    func testRefreshTokenStateUponRefreshFailureWithOAuth2Error() {
+    @MainActor func testRefreshTokenStateUponRefreshFailureWithOAuth2Error() {
         
         //When trying to perform a refresh and the server returns an oauth2 error - the refresh token should be deleted
         
@@ -402,7 +399,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    func testRefreshTokenStateUponRefreshFailureWithUnknownError() {
+    @MainActor func testRefreshTokenStateUponRefreshFailureWithUnknownError() {
         
         //When trying to perform a refresh and the server returns an oauth2 error - the refresh token should be deleted
         

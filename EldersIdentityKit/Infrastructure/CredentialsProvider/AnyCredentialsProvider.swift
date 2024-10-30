@@ -11,7 +11,7 @@ import Foundation
 ///A default, closure based implementation of CredentialsProvider
 public struct AnyCredentialsProvider: CredentialsProvider {
     
-    private let credentialsHandler: (_ handler: @escaping (CredentialsProvider.Username, CredentialsProvider.Password) -> Void) -> Void
+    private let credentialsHandler: (_ handler: @escaping @MainActor (CredentialsProvider.Username, CredentialsProvider.Password) -> Void) -> Void
     private let didFinishAuthenticatingHandler: (() -> Void)?
     private let didFailAuthenticatingHandler: ((Error) -> Void)?
     
@@ -52,7 +52,7 @@ public struct AnyCredentialsProvider: CredentialsProvider {
     
     //MARK: - CredentialsProvider
     
-    public func credentials(handler: @escaping (CredentialsProvider.Username, CredentialsProvider.Password) -> Void) {
+    public func credentials(handler: @escaping @MainActor (CredentialsProvider.Username, CredentialsProvider.Password) -> Void) {
         
         self.credentialsHandler(handler)
     }

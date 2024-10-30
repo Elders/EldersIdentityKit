@@ -63,7 +63,7 @@ open class ClientCredentialsGrantFlow: AuthorizationGrantFlow {
         self.clientAuthorizer.authorize(request: request, handler: handler)
     }
     
-    open func perform(_ request: URLRequest, completion: @escaping @Sendable(NetworkResponse) -> Void) {
+    open func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void) {
         
         self.networkClient.perform(request, completion: completion)
     }
@@ -83,7 +83,7 @@ open class ClientCredentialsGrantFlow: AuthorizationGrantFlow {
         }
     }
     
-    open func authenticate(using request: URLRequest, handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    open func authenticate(using request: URLRequest, handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
         
         self.authorize(request, handler: { (request, error) in
             
@@ -94,20 +94,18 @@ open class ClientCredentialsGrantFlow: AuthorizationGrantFlow {
             }
             
             self.perform(request, completion: { (response) in
-                Task { @MainActor in
-                    do {
+                do {
+                    
+                    let accessTokenResponse = try self.accessTokenResponse(from: response)
+                    try self.validate(accessTokenResponse)
+                    
+                    handler(accessTokenResponse, nil)
+                }
+                catch {
+                    
+                    DispatchQueue.main.async {
                         
-                        let accessTokenResponse = try self.accessTokenResponse(from: response)
-                        try self.validate(accessTokenResponse)
-                        
-                        handler(accessTokenResponse, nil)
-                    }
-                    catch {
-                        
-                        DispatchQueue.main.async {
-                            
-                            handler(nil, error)
-                        }
+                        handler(nil, error)
                     }
                 }
             })
@@ -116,7 +114,7 @@ open class ClientCredentialsGrantFlow: AuthorizationGrantFlow {
     
     //MARK: - AuthorizationGrantFlow
     
-    open func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    open func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
         
         //build the request
         let accessTokenRequest = AccessTokenRequest(scope: self.scope)

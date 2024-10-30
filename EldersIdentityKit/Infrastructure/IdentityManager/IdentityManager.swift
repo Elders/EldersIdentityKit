@@ -22,7 +22,7 @@ public protocol IdentityManager {
      - parameter forceAuthenticate: If true, an authentication is always performed, otherwise authentication is done only if internal state requires it, like the access token has expired
      - parameter handler: The callback, executed when the authorization is complete. The callback takes 2 arguments - an URLRequest and an Error
      */
-    func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable (URLRequest, Error?) -> Void)
+    func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable @MainActor (URLRequest, Error?) -> Void)
     
     ///Clears any authentication state, leading to next authorization to require authentication. (eg Logout)
     func revokeAuthenticationState()
@@ -76,7 +76,7 @@ extension IdentityManager {
      - parameter handler: The callback, executed when the authorization is complete. The callback takes 2 arguments - an URLRequest and an Error
      */
     
-    public func authorize(request: URLRequest, handler: @escaping  @Sendable (URLRequest, Error?) -> Void) {
+    public func authorize(request: URLRequest, handler: @escaping  @Sendable  @MainActor (URLRequest, Error?) -> Void) {
         
         self.authorize(request: request, forceAuthenticate: false, handler: handler)
     }

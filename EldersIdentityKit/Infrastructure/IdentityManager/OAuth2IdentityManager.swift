@@ -154,7 +154,7 @@ open class OAuth2IdentityManager: IdentityManager {
         self.performAuthentication(handler: handler)
     }
     
-    private func performAuthorization(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable (URLRequest, Error?) -> Void) {
+    private func performAuthorization(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable @MainActor (URLRequest, Error?) -> Void) {
         
         if forceAuthenticate == false, let response = self.accessTokenResponse, response.isExpired == false   {
             
@@ -189,7 +189,7 @@ open class OAuth2IdentityManager: IdentityManager {
     
     //MARK: - IdentityManager
     
-    open func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping  @Sendable (URLRequest, Error?) -> Void) {
+    open func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping  @Sendable @MainActor (URLRequest, Error?) -> Void) {
         
         self.queue.addOperation {
             
@@ -228,7 +228,7 @@ open class OAuth2IdentityManager: IdentityManager {
        
         struct PlaceholderIdentityManager: IdentityManager {
             
-            func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping (URLRequest, Error?) -> Void) {}
+            func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable @MainActor (URLRequest, Error?) -> Void) {}
             func revokeAuthenticationState() {}
             func revokeAuthorizationState() {}
             
