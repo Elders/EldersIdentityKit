@@ -12,6 +12,7 @@ import XCTest
 @testable import EldersIdentityKit
 
 @available(iOS 13, tvOS 13.0.0, macOS 10.15, *)
+@MainActor
 class OAuth2IdentityManagerAsyncTests: XCTestCase {
     
     func testOAuth2IdentityManager() async throws {
@@ -26,7 +27,7 @@ class OAuth2IdentityManagerAsyncTests: XCTestCase {
                 self.e = e
             }
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 callCount += 1
@@ -100,7 +101,7 @@ class OAuth2IdentityManagerAsyncTests: XCTestCase {
             
             let e: XCTestExpectation
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 handler(nil, nil)
@@ -108,11 +109,19 @@ class OAuth2IdentityManagerAsyncTests: XCTestCase {
         }
         
         struct NClient: NetworkClient {
+           
+            
             
             let e: XCTestExpectation
             var statusCode: Int
             
-            func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
+            func perform(_ request: URLRequest) async throws -> EldersIdentityKit.NetworkResponse {
+                e.fulfill()
+                
+                return NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil)
+            }
+            
+            func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void) {
                 
                 e.fulfill()
                 completion(NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil))
@@ -154,7 +163,7 @@ class OAuth2IdentityManagerAsyncTests: XCTestCase {
         
         class Flow: AuthorizationGrantFlow {
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 0, refreshToken: "trt1", scope: nil), nil)
             }

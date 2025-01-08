@@ -10,6 +10,7 @@ import Foundation
 import XCTest
 @testable import EldersIdentityKit
 
+@MainActor
 class AccessTokenResponseHandlerTests: XCTestCase {
     
     func testSuccess() {

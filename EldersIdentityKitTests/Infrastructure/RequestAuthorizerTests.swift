@@ -10,6 +10,7 @@ import Foundation
 import XCTest
 @testable import EldersIdentityKit
 
+@MainActor
 class RequestAuthorizerTests: XCTestCase {
     
     func testHTTPBasicAuthorizer() {
@@ -217,10 +218,11 @@ class RequestAuthorizerTests: XCTestCase {
     }
     
     func testSynchronousAuthorization() {
-        
-        let authorizer: RequestAuthorizer = BearerAccessTokenAuthorizer(token: "test_token", method: .query)
-        let request = try! URLRequest(url: URL(string: "http://foo.bar")!).authorized(using: authorizer)
-        
-        XCTAssertEqual(request.url?.absoluteString, "http://foo.bar?access_token=test_token")
+        Task {
+            let authorizer: RequestAuthorizer = BearerAccessTokenAuthorizer(token: "test_token", method: .query)
+            let request = try! await URLRequest(url: URL(string: "http://foo.bar")!).authorized(using: authorizer)
+            
+            XCTAssertEqual(request.url?.absoluteString, "http://foo.bar?access_token=test_token")
+        }
     }
 }

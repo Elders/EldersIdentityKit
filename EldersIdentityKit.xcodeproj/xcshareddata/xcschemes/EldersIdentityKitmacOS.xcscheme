@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E6985DBA206901AD00BE5F6A"
-               BuildableName = "MHIdentityKit.framework"
+               BuildableName = "EldersIdentityKit.framework"
                BlueprintName = "EldersIdentityKit-macOS"
                ReferencedContainer = "container:EldersIdentityKit.xcodeproj">
             </BuildableReference>
@@ -32,7 +32,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E6985DBA206901AD00BE5F6A"
-            BuildableName = "MHIdentityKit.framework"
+            BuildableName = "EldersIdentityKit.framework"
             BlueprintName = "EldersIdentityKit-macOS"
             ReferencedContainer = "container:EldersIdentityKit.xcodeproj">
          </BuildableReference>
@@ -65,7 +65,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E6985DBA206901AD00BE5F6A"
-            BuildableName = "MHIdentityKit.framework"
+            BuildableName = "EldersIdentityKit.framework"
             BlueprintName = "EldersIdentityKit-macOS"
             ReferencedContainer = "container:EldersIdentityKit.xcodeproj">
          </BuildableReference>
@@ -81,7 +81,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E6985DBA206901AD00BE5F6A"
-            BuildableName = "MHIdentityKit.framework"
+            BuildableName = "EldersIdentityKit.framework"
             BlueprintName = "EldersIdentityKit-macOS"
             ReferencedContainer = "container:EldersIdentityKit.xcodeproj">
          </BuildableReference>
