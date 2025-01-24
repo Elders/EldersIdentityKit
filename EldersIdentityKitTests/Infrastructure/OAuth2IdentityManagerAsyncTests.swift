@@ -59,7 +59,7 @@ class OAuth2IdentityManagerAsyncTests: XCTestCase {
                 self.e = e
             }
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 callCount += 1
@@ -171,7 +171,7 @@ class OAuth2IdentityManagerAsyncTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet, userInfo: nil))
             }

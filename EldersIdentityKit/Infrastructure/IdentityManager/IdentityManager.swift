@@ -51,8 +51,11 @@ extension IdentityManager {
     public func authorize(request: URLRequest, forceAuthenticate: Bool) async throws -> URLRequest {
         
         return try await withCheckedThrowingContinuation { continuation in
-            
+            var hasResumed = false
             self.authorize(request: request, forceAuthenticate: forceAuthenticate) { urlRequest, error in
+                
+                guard !hasResumed else { return }
+                            hasResumed = true
                 
                 if let error = error {
                     continuation.resume(throwing: error)

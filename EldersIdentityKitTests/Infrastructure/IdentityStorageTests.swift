@@ -50,7 +50,7 @@ class IdentityStorageTests: XCTestCase {
     
     func testKeychainAccessGroupStorage() {
         
-        let storage: IdentityStorage = KeychainIdentityStorage(service: "test", accessGroup: "KoCMoHaBTa")
+        let storage: IdentityStorage = KeychainIdentityStorage(service: "test", accessGroup: "Elders")
         
         // test nil set
         storage.set(nil, forKey: "k1")

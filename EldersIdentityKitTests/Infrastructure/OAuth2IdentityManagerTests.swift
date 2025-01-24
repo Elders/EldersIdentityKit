@@ -61,7 +61,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
                     self.e = e
                 }
                 
-                func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+                func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                     
                     e.fulfill()
                     callCount += 1
@@ -130,7 +130,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping  @MainActor(AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, EldersIdentityKitError.authenticationFailed(reason: EldersIdentityKitError(error: ErrorResponse(code: .invalidGrant))))
             }
@@ -197,7 +197,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
                 
                 e.fulfill()
                 callCount += 1
-                
+                print("*** callcount\(callCount) ***")
                 guard callCount == 1 else {
                     
                     XCTFail()
@@ -367,7 +367,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, EldersIdentityKitError.authenticationFailed(reason: EldersIdentityKitError(error: ErrorResponse(code: .invalidGrant))))
             }
@@ -413,7 +413,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet, userInfo: nil))
             }

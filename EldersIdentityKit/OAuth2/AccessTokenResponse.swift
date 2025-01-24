@@ -10,7 +10,7 @@ import Foundation
 
 //https://tools.ietf.org/html/rfc6749#section-5.1
 @MainActor
-public struct AccessTokenResponse {
+public struct AccessTokenResponse: Sendable {
     
     public var accessToken: String
     public var tokenType: String

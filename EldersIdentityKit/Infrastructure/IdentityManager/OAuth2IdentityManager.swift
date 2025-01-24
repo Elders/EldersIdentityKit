@@ -99,7 +99,7 @@ open class OAuth2IdentityManager: IdentityManager {
     
     //MARK: - IdentityManager
     
-    private func performAuthentication(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    private func performAuthentication(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
         
         self.postWillAuthenticateNotification()
         
@@ -111,7 +111,7 @@ open class OAuth2IdentityManager: IdentityManager {
         }
     }
     
-    private func authenticate(forced: Bool, handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+    private func authenticate(forced: Bool, handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
         
         //force authenticate
         if forced {
@@ -153,53 +153,57 @@ open class OAuth2IdentityManager: IdentityManager {
         //authenticate
         self.performAuthentication(handler: handler)
     }
-    
+
     private func performAuthorization(request: URLRequest, forceAuthenticate: Bool, handler: @escaping @Sendable @MainActor (URLRequest, Error?) -> Void) {
         
-        if forceAuthenticate == false, let response = self.accessTokenResponse, response.isExpired == false   {
+        var handlerCalled = false
+
+          let safeHandler: @Sendable @MainActor (URLRequest, Error?) -> Void = { request, error in
+              guard !handlerCalled else { return }
+              handlerCalled = true
+              handler(request, error)
+          }
+        
+        if !forceAuthenticate , let response = self.accessTokenResponse, response.isExpired == false   {
             
-            self.tokenAuthorizerProvider(response).authorize(request: request, handler: handler)
+            self.tokenAuthorizerProvider(response).authorize(request: request, handler: safeHandler)
             return
         }
         
         self.authenticate(forced: forceAuthenticate) { (response, error) in
-            Task { @MainActor in
-                guard
-                    error == nil,
-                    let response = response
-                else {
-                    
-                    if self.retryAuthorizationOnAuthenticationError == true && error is ErrorResponse {
-                        
-                        self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: handler)
-                    }
-                    else {
-                        
-                        handler(request, error)
-                    }
-                    
-                    return
-                }
-                
-                self.accessTokenResponse = response
-                self.tokenAuthorizerProvider(response).authorize(request: request, handler: handler)
-            }
-        }
+                       if let error = error {
+                           print("Authentication failed with error: \(error)")
+                           if self.retryAuthorizationOnAuthenticationError, error is ErrorResponse {
+                               // Retry only once
+                               self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: safeHandler)
+                           } else {
+                               safeHandler(request, error)
+                           }
+                           return
+                       }
+
+                       guard let response = response else {
+                           print("Authentication succeeded, but response is nil.")
+                           safeHandler(request, NSError(domain: "AuthorizationError", code: 0, userInfo: nil))
+                           return
+                       }
+                print("Authentication succeeded. Updating token and authorizing.")
+                       self.accessTokenResponse = response
+                       self.tokenAuthorizerProvider(response).authorize(request: request, handler: safeHandler)
+                   }
     }
     
     //MARK: - IdentityManager
     
     open func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping  @Sendable @MainActor (URLRequest, Error?) -> Void) {
-        
         self.queue.addOperation {
+            var isHandlerCalled = false
+            print("*** authorize addin Operation queue ***")
             
             Task {
-                
-                await self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: { (request, error) in
-                    
-                    handler(request, error)
-                    
-                })
+                guard !isHandlerCalled else { return }
+                             isHandlerCalled = true
+                await self.performAuthorization(request: request, forceAuthenticate: forceAuthenticate, handler: handler)
             }
         }
     }
