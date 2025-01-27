@@ -214,7 +214,7 @@ open class OAuth2IdentityManager: IdentityManager {
     //MARK: - IdentityManager
     
     open func authorize(request: URLRequest, forceAuthenticate: Bool, handler: @escaping  @Sendable @MainActor (URLRequest, Error?) -> Void) {
-        //     print("*** Adding to task queue ***")
+        
         queue.addOperation {
             let semaphore = DispatchSemaphore(value: 0)
             

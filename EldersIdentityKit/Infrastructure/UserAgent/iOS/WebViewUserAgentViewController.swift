@@ -27,9 +27,11 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
         self.view.addSubview(progressView)
         
         progressView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.init(item: progressView, attribute: .top, relatedBy: .equal, toItem: self.view.safeAreaLayoutGuide.topAnchor, attribute: .bottom, multiplier: 1, constant: 0).isActive = true
-        NSLayoutConstraint.init(item: progressView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0).isActive = true
-        NSLayoutConstraint.init(item: progressView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0).isActive = true
+        NSLayoutConstraint.activate([
+               progressView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+               progressView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+               progressView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+           ])
         
         return progressView
     }()
@@ -72,15 +74,11 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
     }()
     
     private lazy var webViewIsLoadingObserver = self.webView.observe(\.isLoading) { [weak self] (webView, change) in
-        DispatchQueue.main.async { [weak self] in
             self?.updateControlButtons()
-        }
     }
     
     private lazy var webViewEstimatedProgressObserver = self.webView.observe(\.estimatedProgress) { [weak self] (webView, change) in
-        DispatchQueue.main.async { [weak self] in
             self?.updateProgress()
-        }
     }
     
     private var request: URLRequest?
@@ -133,19 +131,22 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
         self.webView.load(request)
     }
     
-    open func updateControlButtons() {
-        
-        self.backButton.isEnabled = self.webView.canGoBack
-        self.forwardButton.isEnabled = self.webView.canGoForward
-        self.stopButton.isEnabled = self.webView.isLoading
-        self.reloadButton.isEnabled = !self.webView.isLoading
-        
-        self.progressView.isHidden = !self.webView.isLoading
+    open nonisolated func updateControlButtons() {
+        DispatchQueue.main.async { [unowned self] in
+            self.backButton.isEnabled = self.webView.canGoBack
+            self.forwardButton.isEnabled = self.webView.canGoForward
+            self.stopButton.isEnabled = self.webView.isLoading
+            self.reloadButton.isEnabled = !self.webView.isLoading
+            
+            self.progressView.isHidden = !self.webView.isLoading
+        }
     }
     
-    open func updateProgress() {
-        
-        self.progressView.progress = Float(self.webView.estimatedProgress)
+    open nonisolated func updateProgress() {
+        DispatchQueue.main.async { [unowned self] in
+            self.progressView.progress = Float(self.webView.estimatedProgress)
+            
+        }
     }
     
     //MARK: - Actions
