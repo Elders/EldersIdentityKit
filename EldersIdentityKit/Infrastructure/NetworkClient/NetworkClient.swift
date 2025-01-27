@@ -15,6 +15,24 @@ public protocol NetworkClient {
     ///Performs a request and execute a completion handler when it is done
     func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void)
     
-    func perform(_ request: URLRequest) async throws -> NetworkResponse
+   
+}
+
+extension NetworkClient {
+    
+    func perform(_ request: URLRequest) async throws -> NetworkResponse {
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            // Call the callback-based version of `perform`
+            perform(request) { response in
+                // Handle success or failure
+                if let error = response.error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: response)
+                }
+            }
+        }
+    }
 }
 
