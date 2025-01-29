@@ -173,7 +173,7 @@ open class WebViewUserAgentViewController: UIViewController, WKNavigationDelegat
     
     //MARK: - WKNavigationDelegate
     
-    open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping  @MainActor (WKNavigationActionPolicy) -> Void) {
+    open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping @MainActor (WKNavigationActionPolicy) -> Void) {
         
         if (try? self.redirectionHandler?(navigationAction.request)) == true {
             
