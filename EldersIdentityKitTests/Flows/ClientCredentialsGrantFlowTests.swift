@@ -9,7 +9,7 @@
 import Foundation
 import XCTest
 @testable import EldersIdentityKit
-
+@MainActor
 class ClientCredentialsGrantFlowTests: XCTestCase {
     
     let tokenEndpoint = URL(string: "http://foo.bar")!

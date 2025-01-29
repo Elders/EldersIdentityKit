@@ -164,19 +164,6 @@ open class WebViewUserAgentViewController: NSViewController, WKNavigationDelegat
     private var redirectURI: URL?
     private var redirectionHandler:  ((URLRequest) throws -> Bool)?
     
-    deinit {
-        
-        if #available(iOS 11.0, *) {
-            
-        }
-        else {
-            
-            //NOTE: On iOS 10 and below, swift key-value observers are not automatically invalidated upon deallocation, so we have to explicitly invalidate it in order to prevent the app from crashing
-            self.webViewIsLoadingObserver.invalidate()
-            self.webViewEstimatedProgressObserver.invalidate()
-        }
-    }
-    
     open override func loadView() {
         
         self.view = NSView(frame: NSRect(x: 0, y: 0, width: 800, height: 600))
@@ -202,20 +189,22 @@ open class WebViewUserAgentViewController: NSViewController, WKNavigationDelegat
         self.webView.load(request)
     }
     
-    open func updateControlButtons() {
-        
-        self.backButton.isEnabled = self.webView.canGoBack
-        self.forwardButton.isEnabled = self.webView.canGoForward
-        self.stopButton.isEnabled = self.webView.isLoading
-        self.reloadButton.isEnabled = !self.webView.isLoading
-
-        self.progressView.isHidden = !self.webView.isLoading
+    open nonisolated func updateControlButtons() {
+        DispatchQueue.main.async {
+            self.backButton.isEnabled = self.webView.canGoBack
+            self.forwardButton.isEnabled = self.webView.canGoForward
+            self.stopButton.isEnabled = self.webView.isLoading
+            self.reloadButton.isEnabled = !self.webView.isLoading
+            
+            self.progressView.isHidden = !self.webView.isLoading
+        }
     }
     
-    open func updateProgress() {
-        
-        
-        self.progressView.doubleValue = self.webView.estimatedProgress
+    open nonisolated func updateProgress() {
+        DispatchQueue.main.async {
+            
+            self.progressView.doubleValue = self.webView.estimatedProgress
+        }
     }
     
     //MARK: - Actions

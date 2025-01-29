@@ -11,6 +11,7 @@ import XCTest
 @testable import EldersIdentityKit
 
 @available(iOS 13, tvOS 13.0.0, macOS 10.15, *)
+@MainActor
 class ImplicitGrantFlowAsyncTests: XCTestCase {
     
     let authorizationEndpoint = URL(string: "http://foo.bar/auth")!

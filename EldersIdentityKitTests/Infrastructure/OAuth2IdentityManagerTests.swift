@@ -10,8 +10,9 @@ import Foundation
 import XCTest
 @testable import EldersIdentityKit
 
+@MainActor
 class OAuth2IdentityManagerTests: XCTestCase {
-    @MainActor
+    
     func testOAuth2IdentityManager() {
         
         self.performExpectation { (e) in
@@ -28,7 +29,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
                     self.e = e
                 }
                 
-                func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+                func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                     
                     e.fulfill()
                     callCount += 1
@@ -60,7 +61,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
                     self.e = e
                 }
                 
-                func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+                func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                     
                     e.fulfill()
                     callCount += 1
@@ -121,7 +122,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Flow: AuthorizationGrantFlow {
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 0, refreshToken: "trt1", scope: nil), nil)
             }
@@ -129,7 +130,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping  @MainActor(AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, EldersIdentityKitError.authenticationFailed(reason: EldersIdentityKitError(error: ErrorResponse(code: .invalidGrant))))
             }
@@ -178,7 +179,6 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    @MainActor
     func testSerialAuthorizationBehaviour() {
         
         //if multiple authorization calls are made - only 1 should perform authentication :):)
@@ -193,11 +193,11 @@ class OAuth2IdentityManagerTests: XCTestCase {
                 self.e = e
             }
             
-            func authenticate(handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 callCount += 1
-                
+                print("*** callcount\(callCount) ***")
                 guard callCount == 1 else {
                     
                     XCTFail()
@@ -230,13 +230,13 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    @MainActor func testPerformingRequestsUsingStandartResponseValidator() {
+    func testPerformingRequestsUsingStandartResponseValidator() {
         
         struct Flow: AuthorizationGrantFlow {
             
             let e: XCTestExpectation
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 handler(nil, nil)
@@ -250,12 +250,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
             let e: XCTestExpectation
             var statusCode: Int
             
-            func perform(_ request: URLRequest) async throws -> EldersIdentityKit.NetworkResponse {
-                e.fulfill()
-                return NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil)
-            }
-            
-            func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
+            func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void) {
                 
                 e.fulfill()
                 completion(NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil))
@@ -264,7 +259,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         self.performExpectation { (e) in
             
-            e.expectedFulfillmentCount = 12
+            e.expectedFulfillmentCount = 10
             
             let manager: IdentityManager = OAuth2IdentityManager(flow: Flow(e: e), refresher: nil, storage: InMemoryIdentityStorage(), authorizationMethod: .header)
             
@@ -272,7 +267,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
             
             //performing sohuld honor the instanace type
             //total of 3 fulfils should occur - 1 for flow, 1 for client and 1 for perform completion
-            manager.perform(URLRequest(url: URL(string: "http://foo.bar")!), using: networkClient, retryAttempts: 3, completion: { (response) in
+             manager.perform(URLRequest(url: URL(string: "http://foo.bar")!), using: networkClient, retryAttempts: 3, completion: { (response) in
                 
                 e.fulfill()
             })
@@ -289,13 +284,13 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    @MainActor func testPerformingRequestsUsingCustomResponseValidator() {
+    func testPerformingRequestsUsingCustomResponseValidator() {
         
         struct Flow: AuthorizationGrantFlow {
             
             let e: XCTestExpectation
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 e.fulfill()
                 handler(nil, nil)
@@ -307,12 +302,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
             let e: XCTestExpectation
             var statusCode: Int
             
-            func perform(_ request: URLRequest) async throws -> EldersIdentityKit.NetworkResponse {
-                e.fulfill()
-                return NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil)
-            }
-            
-            func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
+            func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void) {
                 
                 e.fulfill()
                 completion(NetworkResponse(data: nil, response: HTTPURLResponse(url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil), error: nil))
@@ -321,7 +311,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         self.performExpectation { (e) in
             
-            e.expectedFulfillmentCount = 12
+            e.expectedFulfillmentCount = 10
             
             let m = OAuth2IdentityManager(flow: Flow(e: e), refresher: nil, storage: InMemoryIdentityStorage(), authorizationMethod: .header)
             let manager: IdentityManager = m
@@ -359,7 +349,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Flow: AuthorizationGrantFlow {
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 0, refreshToken: "trt1", scope: nil), nil)
             }
@@ -367,7 +357,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, EldersIdentityKitError.authenticationFailed(reason: EldersIdentityKitError(error: ErrorResponse(code: .invalidGrant))))
             }
@@ -399,13 +389,13 @@ class OAuth2IdentityManagerTests: XCTestCase {
         }
     }
     
-    @MainActor func testRefreshTokenStateUponRefreshFailureWithUnknownError() {
+    func testRefreshTokenStateUponRefreshFailureWithUnknownError() {
         
         //When trying to perform a refresh and the server returns an oauth2 error - the refresh token should be deleted
         
         class Flow: AuthorizationGrantFlow {
             
-            func authenticate(handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func authenticate(handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(AccessTokenResponse(accessToken: "tat1", tokenType: "Bearer", expiresIn: 0, refreshToken: "trt1", scope: nil), nil)
             }
@@ -413,7 +403,7 @@ class OAuth2IdentityManagerTests: XCTestCase {
         
         class Refresher: AccessTokenRefresher {
             
-            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping (AccessTokenResponse?, Error?) -> Void) {
+            func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @MainActor (AccessTokenResponse?, Error?) -> Void) {
                 
                 handler(nil, NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet, userInfo: nil))
             }

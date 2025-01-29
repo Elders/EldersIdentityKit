@@ -33,7 +33,6 @@ extension AuthorizationGrantFlow {
     public func authenticate() async throws -> AccessTokenResponse {
         
         return try await withCheckedThrowingContinuation { continuation in
-            
             self.authenticate { response, error in
                 
                 if let error = error {

@@ -10,6 +10,7 @@ import Foundation
 import XCTest
 @testable import EldersIdentityKit
 
+@MainActor
 class CredentialsProviderTests: XCTestCase {
     
     func testDefaultCredentialsProvider() {

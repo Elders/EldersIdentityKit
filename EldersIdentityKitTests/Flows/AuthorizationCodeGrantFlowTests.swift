@@ -10,6 +10,7 @@ import Foundation
 import XCTest
 @testable import EldersIdentityKit
 
+@MainActor
 class AuthorizationCodeGrantFlowTests: XCTestCase {
     
     let authorizationEndpoint = URL(string: "http://foo.bar/auth")!

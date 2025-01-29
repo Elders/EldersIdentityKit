@@ -49,9 +49,8 @@ extension IdentityManager {
     
     @available(iOS 13, tvOS 13, macOS 10.15, watchOS 6, *)
     public func authorize(request: URLRequest, forceAuthenticate: Bool) async throws -> URLRequest {
-        
         return try await withCheckedThrowingContinuation { continuation in
-            
+           
             self.authorize(request: request, forceAuthenticate: forceAuthenticate) { urlRequest, error in
                 
                 if let error = error {
@@ -221,6 +220,7 @@ extension IdentityManager {
             do {
                 let request =  try await self.authorize(request: request, forceAuthenticate: forceAuthenticate)
                 
+                
                 let response = try await networkClient.perform(request)
                 let validator = validator ?? self.responseValidator
                 if validator.validate(response) == false && retryAttempts > 0 {
@@ -231,8 +231,19 @@ extension IdentityManager {
                 
                 completion(response)
             } catch(let error) {
-                completion(NetworkResponse(data: nil, response: nil, error: error))
-                return
+                if retryAttempts > 0 {
+                                print("Error encountered, retrying. Remaining attempts: \(retryAttempts - 1)")
+                                self.perform(
+                                    request,
+                                    using: networkClient,
+                                    retryAttempts: retryAttempts - 1,
+                                    validator: validator,
+                                    forceAuthenticate: true,
+                                    completion: completion
+                                )
+                            } else {
+                                completion(NetworkResponse(data: nil, response: nil, error: error))
+                            }
             }
         }
     }

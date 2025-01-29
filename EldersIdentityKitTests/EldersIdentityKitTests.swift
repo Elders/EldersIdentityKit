@@ -9,7 +9,7 @@
 import XCTest
 @testable import EldersIdentityKit
 
-extension String: Error {}
+extension String: @retroactive Error {}
 
 class TestNetworkClient: NetworkClient {
     
@@ -20,7 +20,15 @@ class TestNetworkClient: NetworkClient {
         self.handler = handler
     }
     
-    func perform(_ request: URLRequest, completion: @escaping (NetworkResponse) -> Void) {
+    func perform(_ request: URLRequest) async throws -> EldersIdentityKit.NetworkResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+               self.perform(request) { response in
+                   continuation.resume(returning: response)
+               }
+           }
+    }
+    
+    func perform(_ request: URLRequest, completion: @escaping @Sendable @MainActor (NetworkResponse) -> Void) {
         
         self.handler(request, completion)
     }

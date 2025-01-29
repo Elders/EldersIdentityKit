@@ -12,7 +12,7 @@ import Foundation
 @MainActor
 public protocol AccessTokenRefresher {
     
-    func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @Sendable (AccessTokenResponse?, Error?) -> Void)
+    func refresh(using requestModel: AccessTokenRefreshRequest, handler: @escaping @Sendable @MainActor (AccessTokenResponse?, Error?) -> Void)
 }
 
 extension AccessTokenRefresher {
