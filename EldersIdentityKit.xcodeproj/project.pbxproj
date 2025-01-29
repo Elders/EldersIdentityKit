@@ -25,6 +25,7 @@
 		1EEF02FF289D3DD00087B863 /* RequestAuthorizerAsyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEF02FE289D3DD00087B863 /* RequestAuthorizerAsyncTests.swift */; };
 		1EEF0300289D3DD00087B863 /* RequestAuthorizerAsyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEF02FE289D3DD00087B863 /* RequestAuthorizerAsyncTests.swift */; };
 		1EEF0301289D3DD00087B863 /* RequestAuthorizerAsyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEF02FE289D3DD00087B863 /* RequestAuthorizerAsyncTests.swift */; };
+		90D24A3D2D4A648D0014F9EA /* EldersIdentityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E6985D9F2069018500BE5F6A /* EldersIdentityKit.framework */; };
 		9954AE4F1E9D169700F2A73D /* EldersIdentityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9954AE451E9D169700F2A73D /* EldersIdentityKit.framework */; };
 		9954AE541E9D169700F2A73D /* EldersIdentityKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9954AE531E9D169700F2A73D /* EldersIdentityKitTests.swift */; };
 		9954AE561E9D169700F2A73D /* EldersIdentityKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 9954AE481E9D169700F2A73D /* EldersIdentityKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -251,6 +252,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		90D24A3F2D4A648D0014F9EA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9954AE3C1E9D169700F2A73D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E6985D9E2069018500BE5F6A;
+			remoteInfo = "EldersIdentityKit-tvOS";
+		};
 		9954AE501E9D169700F2A73D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9954AE3C1E9D169700F2A73D /* Project object */;
@@ -478,6 +486,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				90D24A3D2D4A648D0014F9EA /* EldersIdentityKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -955,6 +964,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				90D24A402D4A648D0014F9EA /* PBXTargetDependency */,
 			);
 			name = "EldersIdentityKit-tvOSTestsHost";
 			productName = "MHIdentityKit-tvOSTestsHost";
@@ -1456,6 +1466,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		90D24A402D4A648D0014F9EA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E6985D9E2069018500BE5F6A /* EldersIdentityKit-tvOS */;
+			targetProxy = 90D24A3F2D4A648D0014F9EA /* PBXContainerItemProxy */;
+		};
 		9954AE511E9D169700F2A73D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9954AE441E9D169700F2A73D /* EldersIdentityKit-iOS */;
@@ -1777,7 +1792,7 @@
 				CODE_SIGN_ENTITLEMENTS = "EldersIdentityKit-iOSTestsHost/EldersIdentityKit-iOSTestsHost.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = KVZRY93658;
+				DEVELOPMENT_TEAM = 4RC8K35TSD;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "EldersIdentityKit-iOSTestsHost/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -1786,6 +1801,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Elders.EldersIdentityKit-iOSTestsHost";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
@@ -1802,7 +1818,7 @@
 				CODE_SIGN_ENTITLEMENTS = "EldersIdentityKit-iOSTestsHost/EldersIdentityKit-iOSTestsHost.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = KVZRY93658;
+				DEVELOPMENT_TEAM = 4RC8K35TSD;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "EldersIdentityKit-iOSTestsHost/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -1811,6 +1827,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Elders.EldersIdentityKit-iOSTestsHost";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
@@ -2129,6 +2146,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Elders.EldersIdentityKit-tvOSTestsHost";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -2155,6 +2173,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Elders.EldersIdentityKit-tvOSTestsHost";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = appletvos;
@@ -2175,6 +2194,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 4RC8K35TSD;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "EldersIdentityKit-macOSTestsHost/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2182,6 +2202,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Elders.EldersIdentityKit-macOSTestsHost";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -2200,6 +2221,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 4RC8K35TSD;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "EldersIdentityKit-macOSTestsHost/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2207,6 +2229,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11;
+				MARKETING_VERSION = 1.15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Elders.EldersIdentityKit-macOSTestsHost";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
