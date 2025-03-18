@@ -74,6 +74,7 @@ open class OAuth2IdentityManager: IdentityManager {
             
             self.storage?.refreshToken = self.accessTokenResponse?.refreshToken
             self.storage?.scope = self.accessTokenResponse?.scope
+            self.storage?.idToken = self.accessTokenResponse?.additionalParameters[AccessTokenResponse.ParameterKey.idToken] as? String
         }
     }
     
@@ -89,6 +90,21 @@ open class OAuth2IdentityManager: IdentityManager {
         }
         
         return refreshToken
+    }
+    
+    public var idToken: String? {
+        
+        get {
+            let idToken = self.accessTokenResponse?.additionalParameters[AccessTokenResponse.ParameterKey.idToken] as? String ?? self.storage?.idToken
+            
+            //if token is empty string - ignore it
+            if idToken?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
+                
+                return nil
+            }
+            
+            return idToken
+        }
     }
     
     private var scope: Scope? {
@@ -262,6 +278,7 @@ open class OAuth2IdentityManager: IdentityManager {
         
         return PlaceholderIdentityManager.defaultResponseValidator
     }()
+    
 }
 
 extension OAuth2IdentityManager {
@@ -373,6 +390,27 @@ extension IdentityStorage {
         set {
             
             self[scopeValueKey] = newValue?.value
+        }
+    }
+}
+
+extension IdentityStorage {
+    
+    private var idTokenValueKey: String {
+        
+        return bundleIdentifier + ".OAuth2IdentityManager.id_token"
+    }
+    
+    fileprivate var idToken: String? {
+        
+        get {
+            
+            return self[idTokenValueKey]
+        }
+        
+        set {
+            
+            self[idTokenValueKey] = newValue
         }
     }
 }

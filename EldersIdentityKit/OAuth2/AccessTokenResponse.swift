@@ -101,6 +101,7 @@ extension AccessTokenResponse {
         public static let tokenType = "token_type"
         public static let expiresIn = "expires_in"
         public static let refreshToken = "refresh_token"
+        public static let idToken = "id_token"
         public static let scope = "scope"
     }
 }
