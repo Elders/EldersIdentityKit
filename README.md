@@ -1,4 +1,4 @@
-# OneSoftwareIdentityKit
+# EldersIdentityKit
 
 [![Build Status](https://app.bitrise.io/app/94d7f7f8c90d806a/status.svg?token=uHSLJczg75y16H8qzqPpHA&branch=master)](https://app.bitrise.io/app/94d7f7f8c90d806a)
 
@@ -11,11 +11,11 @@ https://developer.apple.com/library/content/technotes/tn2435/_index.html#//apple
 
 #### [Carthage](https://github.com/Carthage/Carthage)
 
-Add `github "1SoftwareCompany/OneSoftwareIdentityKit"` to your `Cartfile`, then [Embed] the framework directly into your project.
+Add `github "KoCMoHaBTa/EldersIdentityKit"` to your `Cartfile`, then [Embed] the framework directly into your project.
 
 #### [Cocoapods](https://cocoapods.org)
 
-Add `pod 'OneSoftwareIdentityKit'` to your  `Podfile`
+Add `pod 'EldersIdentityKit'` to your  `Podfile`
 
 #### [Submodules](http://git-scm.com/docs/git-submodule)
 
@@ -23,7 +23,7 @@ Add `pod 'OneSoftwareIdentityKit'` to your  `Podfile`
 
 #### Manually
 
-[Download](https://github.com/1SoftwareCompany/OneSoftwareIdentityKit/releases), then [Embed] the framework directly into your project
+[Download](https://github.com/KoCMoHaBTa/EldersIdentityKit/releases), then [Embed] the framework directly into your project
 
 ## How to use
 
